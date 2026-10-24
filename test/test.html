@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Fake call</title>
+<style>
+  body{margin:0;background:#000;color:#fff;font:14px sans-serif;height:100vh}
+  #remote{width:100%;height:80vh;object-fit:cover}
+  #self{position:absolute;right:20px;bottom:120px;width:160px}
+  #bar{display:flex;gap:10px;justify-content:center;padding:16px}
+  button{padding:8px 14px}
+</style>
+<!-- Stub getUserMedia with a canvas stream so no real camera is needed. -->
+<script>
+  function canvasStream(color, label) {
+    const c = document.createElement("canvas");
+    c.width = 320; c.height = 240;
+    const g = c.getContext("2d");
+    let n = 0;
+    setInterval(() => {
+      g.fillStyle = color; g.fillRect(0, 0, 320, 240);
+      g.fillStyle = "#fff"; g.font = "28px sans-serif"; g.fillText(label + " " + (n++ % 100), 20, 130);
+    }, 100);
+    return c.captureStream(10);
+  }
+  navigator.mediaDevices.getUserMedia = async () => {
+    const s = canvasStream("#2a6", "You");
+    const ac = new AudioContext();
+    const dst = ac.createMediaStreamDestination();
+    s.addTrack(dst.stream.getAudioTracks()[0]);
+    return s;
+  };
+</script>
+<script src="../mic-hook.js"></script>
+</head>
+<body>
+<video id="remote" autoplay playsinline muted></video>
+<video id="self" autoplay playsinline muted></video>
+<div id="bar">
+  <button id="micBtn" aria-label="Mute">Mute</button>
+  <button id="camBtn" aria-label="Turn off camera">Camera</button>
+  <button id="endBtn" aria-label="End call">End</button>
+  <button id="herTalk" onclick="herGain.gain.value = herGain.gain.value ? 0 : 0.5; this.textContent = herGain.gain.value ? 'Her: stop talking' : 'Her: talk'">Her: talk</button>
+  <button id="herMute" onclick="const s=document.getElementById('herMutedLabel'); s ? s.remove() : document.body.insertAdjacentHTML('beforeend','<span id=herMutedLabel aria-label=&quot;Fiancée is muted&quot;></span>')">Her: mute</button>
+  <button id="remove"onclick="document.querySelectorAll('#micBtn,#camBtn').forEach(b=>b.remove())">Remove IG buttons (test fallback)</button>
+</div>
+<p id="log" style="padding:0 16px"></p>
+<script>
+  const log = (t) => (document.getElementById("log").textContent = t);
+  let local;
+  const remoteVid = document.getElementById("remote"), selfVid = document.getElementById("self");
+  (async () => {
+    local = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    document.getElementById("self").srcObject = local;
+    // Her stream: canvas video + a tone we can switch on/off to fake her talking.
+    const her = canvasStream("#a35", "Fiancée");
+    const ac = new AudioContext();
+    const osc = ac.createOscillator();
+    window.herGain = ac.createGain();
+    herGain.gain.value = 0;
+    const dst = ac.createMediaStreamDestination();
+    osc.connect(herGain).connect(dst);
+    osc.start();
+    her.addTrack(dst.stream.getAudioTracks()[0]);
+    document.getElementById("remote").srcObject = her;
+  })();
+  const mic = document.getElementById("micBtn"), cam = document.getElementById("camBtn");
+  mic.onclick = () => {
+    const t = local.getAudioTracks()[0]; t.enabled = !t.enabled;
+    mic.setAttribute("aria-label", t.enabled ? "Mute" : "Unmute");
+    log("page mic button clicked → " + (t.enabled ? "on" : "off"));
+  };
+  cam.onclick = () => {
+    const t = local.getVideoTracks()[0]; t.enabled = !t.enabled;
+    cam.setAttribute("aria-label", t.enabled ? "Turn off camera" : "Turn on camera");
+    log("page camera button clicked → " + (t.enabled ? "on" : "off"));
+  };
+  document.getElementById("endBtn").onclick = () => {
+    [remoteVid, selfVid].forEach((v) => {
+      v.srcObject?.getTracks().forEach((t) => t.stop());
+    });
+    log("call ended");
+  };
+</script>
+<!-- ?simulate=1 renders the PiP window as an in-page frame (for browsers that can't open real PiP windows). -->
+<script>
+  if (location.search.includes("simulate")) {
+    Object.defineProperty(window, "documentPictureInPicture", { configurable: true, value: {
+      requestWindow: async ({ width, height }) => {
+        const f = document.createElement("iframe");
+        f.id = "fakepip";
+        f.style.cssText = `position:fixed;left:20px;top:20px;width:${width}px;height:${height}px;border:2px solid #fff;border-radius:10px;z-index:9999`;
+        document.body.appendChild(f);
+        const w = f.contentWindow;
+        w.close = () => { w.dispatchEvent(new Event("pagehide")); f.remove(); };
+        // ?minw=280 pretends the browser won't make the window narrower than that.
+        const minW = +(new URLSearchParams(location.search).get("minw") || 0);
+        w.resizeTo = (nw, nh) => { nw = Math.max(nw, minW); f.style.width = nw + "px"; f.style.height = nh + "px"; w.dispatchEvent(new Event("resize")); };
+        Object.defineProperty(w, "outerWidth", { get: () => f.offsetWidth });
+        Object.defineProperty(w, "outerHeight", { get: () => f.offsetHeight });
+        return w;
+      },
+    } });
+  }
+</script>
+<script src="../content.js"></script>
+</body>
+</html>

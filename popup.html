@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body{margin:0;width:280px;padding:16px;background:#1C1C1E;color:#fff;-webkit-font-smoothing:antialiased;
+    font:13px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;letter-spacing:-.01em}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  header img{width:32px;height:32px;border-radius:8px}
+  h1{font-size:15px;font-weight:600;margin:0}
+  header p{margin:1px 0 0;color:rgba(235,235,245,.6);font-size:12px}
+  ol{list-style:none;margin:0;padding:0;background:#2C2C2E;border-radius:12px}
+  li{display:flex;gap:10px;align-items:baseline;padding:10px 12px}
+  li + li{border-top:.5px solid rgba(84,84,88,.65)}
+  li b{flex:none;width:18px;height:18px;border-radius:50%;background:linear-gradient(45deg,#FEDA75,#FA7E1E,#D62976,#962FBF,#4F5BD5);
+    font-size:11px;display:inline-flex;align-items:center;justify-content:center;transform:translateY(2px)}
+  kbd{background:#3A3A3C;border-radius:5px;padding:1px 6px;font:12px -apple-system,BlinkMacSystemFont,sans-serif}
+  .note{margin:12px 2px 0;color:rgba(235,235,245,.6);font-size:12px}
+</style>
+</head>
+<body>
+  <header>
+    <img src="icons/icon48.png" alt="">
+    <div><h1>Instagram Call PiP</h1><p>Keep your call on top while you work</p></div>
+  </header>
+  <ol>
+    <li><b>1</b><span>Start a video call on instagram.com</span></li>
+    <li><b>2</b><span>Click <strong>Pop out</strong> on the call, or press <kbd>⌥</kbd> <kbd>P</kbd></span></li>
+    <li><b>3</b><span><kbd>M</kbd> mic · <kbd>V</kbd> camera · <kbd>S</kbd> size</span></li>
+  </ol>
+  <p class="note">The pop-out starts from the call page itself, because the browser only opens a floating window after a click on that page.</p>
+</body>
+</html>
