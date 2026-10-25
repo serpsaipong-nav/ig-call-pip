@@ -445,7 +445,7 @@
         <div id="ring" title="She's speaking"></div>
         <div id="topShade" class="fade"></div>
         <div id="shade" class="fade"></div>
-        <div id="timer" class="glass fade"><i></i><span>0:00</span></div>
+        <div id="timer" class="glass fade"><i></i><span>00:00:00</span></div>
         <div id="herMic" class="glass" role="status" title="Her mic is muted">
           <span class="ico">${ICONS.micOff}</span><span class="txt">Muted</span>
         </div>
@@ -733,7 +733,8 @@
 
     if (callStart) {
       const s = Math.floor((Date.now() - callStart) / 1000);
-      controls.timer.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+      const two = (n) => String(n).padStart(2, "0");
+      controls.timer.textContent = `${two(Math.floor(s / 3600))}:${two(Math.floor(s / 60) % 60)}:${two(s % 60)}`;
     }
   };
 
