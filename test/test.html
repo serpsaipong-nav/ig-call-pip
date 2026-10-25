@@ -42,28 +42,54 @@
   <button id="endBtn" aria-label="End call">End</button>
   <button id="herTalk" onclick="herGain.gain.value = herGain.gain.value ? 0 : 0.5; this.textContent = herGain.gain.value ? 'Her: stop talking' : 'Her: talk'">Her: talk</button>
   <button id="herMute" onclick="const s=document.getElementById('herMutedLabel'); s ? s.remove() : document.body.insertAdjacentHTML('beforeend','<span id=herMutedLabel aria-label=&quot;Fiancée is muted&quot;></span>')">Her: mute</button>
+  <button id="herSwitch" onclick="switchDevice()">Her: switch device</button>
   <button id="remove"onclick="document.querySelectorAll('#micBtn,#camBtn').forEach(b=>b.remove())">Remove IG buttons (test fallback)</button>
 </div>
 <p id="log" style="padding:0 16px"></p>
 <script>
   const log = (t) => (document.getElementById("log").textContent = t);
   let local;
-  const remoteVid = document.getElementById("remote"), selfVid = document.getElementById("self");
+  let remoteVid = document.getElementById("remote");
+  const selfVid = document.getElementById("self");
+  // Her audio: a tone we can switch on/off to fake her talking. Each "device" gets its own track.
+  const ac = new AudioContext();
+  const osc = ac.createOscillator();
+  window.herGain = ac.createGain();
+  herGain.gain.value = 0;
+  osc.connect(herGain);
+  osc.start();
+  const herStream = (color, label) => {
+    const s = canvasStream(color, label);
+    const dst = ac.createMediaStreamDestination();
+    herGain.connect(dst);
+    s.addTrack(dst.stream.getAudioTracks()[0]);
+    return s;
+  };
   (async () => {
     local = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    document.getElementById("self").srcObject = local;
-    // Her stream: canvas video + a tone we can switch on/off to fake her talking.
-    const her = canvasStream("#a35", "Fiancée");
-    const ac = new AudioContext();
-    const osc = ac.createOscillator();
-    window.herGain = ac.createGain();
-    herGain.gain.value = 0;
-    const dst = ac.createMediaStreamDestination();
-    osc.connect(herGain).connect(dst);
-    osc.start();
-    her.addTrack(dst.stream.getAudioTracks()[0]);
-    document.getElementById("remote").srcObject = her;
+    selfVid.srcObject = local;
+    remoteVid.srcObject = herStream("#a35", "Fiancée");
   })();
+  // Like Instagram when she moves the call to another device: her old video stops and is removed,
+  // then after a short gap a new <video> appears with a brand-new stream.
+  let device = 0;
+  window.switchDevice = (gapMs = 2000) => {
+    const old = remoteVid;
+    const marker = document.createComment("remote");
+    old.before(marker);
+    old.srcObject?.getTracks().forEach((t) => t.stop());
+    old.remove();
+    log("she's switching devices…");
+    setTimeout(() => {
+      device++;
+      const v = document.createElement("video");
+      v.id = "remote"; v.autoplay = v.playsInline = v.muted = true;
+      v.srcObject = herStream(device % 2 ? "#36c" : "#a35", device % 2 ? "Fiancée (iPad)" : "Fiancée");
+      marker.replaceWith(v);
+      remoteVid = v;
+      log("she's on device " + (device + 1));
+    }, gapMs);
+  };
   const mic = document.getElementById("micBtn"), cam = document.getElementById("camBtn");
   mic.onclick = () => {
     const t = local.getAudioTracks()[0]; t.enabled = !t.enabled;
