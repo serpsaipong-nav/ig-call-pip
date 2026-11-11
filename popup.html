@@ -16,6 +16,13 @@
     font-size:11px;display:inline-flex;align-items:center;justify-content:center;transform:translateY(2px)}
   kbd{background:#3A3A3C;border-radius:5px;padding:1px 6px;font:12px -apple-system,BlinkMacSystemFont,sans-serif}
   .note{margin:12px 2px 0;color:rgba(235,235,245,.6);font-size:12px}
+  #loop{margin-top:14px;background:#2C2C2E;border-radius:12px;padding:12px}
+  #loop h2{font-size:13px;font-weight:600;margin:0 0 8px}
+  #call{width:100%;height:34px;border:0;border-radius:9px;color:#fff;font:600 13px -apple-system,BlinkMacSystemFont,sans-serif;cursor:pointer;
+    background:linear-gradient(45deg,#FA7E1E,#D62976,#962FBF)}
+  #call.stop{background:#3A3A3C}
+  #call:disabled{opacity:.4;cursor:default}
+  #hint{margin:8px 0 0;color:rgba(235,235,245,.6);font-size:12px}
 </style>
 </head>
 <body>
@@ -28,6 +35,12 @@
     <li><b>2</b><span>Click <strong>Pop out</strong> on the call, or press <kbd>⌥</kbd> <kbd>P</kbd></span></li>
     <li><b>3</b><span><kbd>M</kbd> mic · <kbd>V</kbd> camera · <kbd>S</kbd> size</span></li>
   </ol>
+  <section id="loop" hidden>
+    <h2>Loop call</h2>
+    <button id="call">Call her</button>
+    <p id="hint"></p>
+  </section>
   <p class="note">The pop-out starts from the call page itself, because the browser only opens a floating window after a click on that page.</p>
+<script src="popup.js"></script>
 </body>
 </html>

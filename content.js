@@ -57,6 +57,7 @@
   };
 
   const hangUp = () => {
+    window.dispatchEvent(new Event("igpip:userHangup")); // tells loop-call.js you ended it on purpose
     const btn = findButton("hangup");
     if (btn) btn.click();
     closePip();
