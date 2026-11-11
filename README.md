@@ -23,7 +23,8 @@ Pops an Instagram video call into a small floating window that stays on top of e
    - Drag your self-view to any corner.
    - The controls fade out when you're not moving the mouse. Move the mouse over the window to bring them back.
    - The window size and self-view corner are remembered for your next call.
-5. To bring the video back into the tab, close the floating window or click **Bring back**.
+5. Optional: the call can pop out by itself when you switch to another tab in the same window. On instagram.com, set **Automatic picture-in-picture** to Allow in the site settings (the padlock next to the address bar). Only one picture-in-picture window can be open at a time, so if YouTube keeps taking the window, set the same setting to Block on youtube.com. If you press YouTube's own pop-out button it will still replace the call; press **Alt+P** to bring the call back.
+6. To bring the video back into the tab, close the floating window or click **Bring back**.
 
 Keep the call tab open. It can sit in the background, but closing it ends the call.
 
