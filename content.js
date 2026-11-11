@@ -739,6 +739,19 @@
     }
   };
 
+  // ---------- Automatic pop-out ----------
+  // While a call is on, ask the browser to pop it out by itself when you switch to another tab.
+  // The browser only does this when instagram.com's "Automatic picture-in-picture" site setting
+  // allows it and the camera or mic is live; otherwise Alt+P / the pill still work.
+  let autoPipOn = false;
+  const setAutoPip = (on) => {
+    if (on === autoPipOn) return;
+    try {
+      navigator.mediaSession.setActionHandler("enterpictureinpicture", on ? () => { openPip().catch(() => {}); } : null);
+      autoPipOn = on;
+    } catch (_) { autoPipOn = on; }   // not supported here: don't keep retrying every second
+  };
+
   // ---------- Main loop ----------
   const tick = () => {
     if (callVideos().length) lastCallSeen = Date.now();
@@ -747,7 +760,9 @@
     if (inCall) {
       if (!callStart) callStart = Date.now();
       ensurePill();
+      setAutoPip(true);
     } else {
+      setAutoPip(false);
       callStart = null;
       removePill();
       closePip();
